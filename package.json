@@ -1,0 +1,41 @@
+{
+  "name": "react-aki",
+  "version": "0.0.1",
+  "description": "Yet another state management for React, but with simplicity and flexibility.",
+  "main": "lib/index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "files": [
+    "lib/*.js",
+    "lib/*.d.ts"
+  ],
+  "scripts": {
+    "cleanBuild": "rm -rf ./lib/* && tsc",
+    "syncLib2Examples": "cd examples/node_modules && ln -s ../.. react-aki",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/afterwind-io/react-aki.git"
+  },
+  "keywords": [
+    "react",
+    "state",
+    "store",
+    "management"
+  ],
+  "author": "afterwind",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/afterwind-io/react-aki/issues"
+  },
+  "homepage": "https://github.com/afterwind-io/react-aki#readme",
+  "peerDependencies": {
+    "@types/react": ">=16.8.0",
+    "react": ">=16.8.0"
+  },
+  "devDependencies": {
+    "benchmark": "^2.1.4"
+  }
+}
