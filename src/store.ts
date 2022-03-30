@@ -1,11 +1,11 @@
-import { BitMask } from './bitmask';
+import { BitMask } from "./bitmask";
 import {
   buildAggregatorsApi,
   buildMutatorsApi,
   simpleDeepClone,
-} from './helper';
-import { Signal, Signals } from './signal';
-import { AkiAggregator, AkiBatchExecutor, AkiMutator } from './type';
+} from "./helper";
+import { Signal, Signals } from "./signal";
+import { AkiAggregator, AkiBatchExecutor, AkiMutator } from "./type";
 
 interface AkiStoreSignals<T> extends Signals {
   update(mask: BitMask): void;
@@ -47,9 +47,10 @@ export class AkiStore<T, M, A> {
     );
   }
 
-  public async batch(executor: AkiBatchExecutor<T, M, A>) {
-    const pool: Partial<T> = {};
-
+  public async batch(
+    executor: AkiBatchExecutor<T, M, A>,
+    pool: Partial<T> = {}
+  ) {
     const collectiveMutate = (values: Partial<T>) => {
       // FIXME 与下方的this.mutate会重复设置值
       Object.assign(this.store, values);
@@ -67,7 +68,7 @@ export class AkiStore<T, M, A> {
       this.store,
       collectiveMutate,
       batchMutators,
-      this.batch
+      (executor) => this.batch(executor, pool)
     );
 
     await Promise.resolve(
@@ -99,22 +100,12 @@ export class AkiStore<T, M, A> {
         update();
       }
     };
-    this.signal.connect('update', updateHandler);
+    this.signal.connect("update", updateHandler);
 
-    return () => this.signal.disconnect('update', updateHandler);
+    return () => this.signal.disconnect("update", updateHandler);
   };
 
-  public mutate(values: Partial<T>): void;
-  // tslint:disable-next-line: unified-signatures
-  public mutate(setter: (store: T) => Partial<T>): void;
-  public mutate(m: ((store: T) => Partial<T>) | Partial<T>): void {
-    let values: Partial<T>;
-    if (typeof m === 'function') {
-      values = m(this.store);
-    } else {
-      values = m;
-    }
-
+  public mutate(values: Partial<T>): void {
     let mask = BitMask.FromBitIndex(0);
     for (const key of Object.keys(values) as (keyof T)[]) {
       const maskBit = this.getMaskBitByKey(key);
@@ -124,10 +115,10 @@ export class AkiStore<T, M, A> {
       const value = values[key];
       this.store[key] = value!;
 
-      this.signal.emit('watch', key, value);
+      this.signal.emit("watch", key, value);
     }
 
-    this.signal.emit('update', mask);
+    this.signal.emit("update", mask);
   }
 
   public watch<K extends keyof T>(
@@ -140,8 +131,8 @@ export class AkiStore<T, M, A> {
       }
     };
 
-    this.signal.connect('watch', watchHandler);
-    return () => this.signal.disconnect('watch', watchHandler);
+    this.signal.connect("watch", watchHandler);
+    return () => this.signal.disconnect("watch", watchHandler);
   }
 
   private getMaskBitByKey(key: keyof T): BitMask {
